@@ -1,0 +1,22 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="uinbdg.developer.surveymultibahasa.fragment.SurveyFragment">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_survey"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@layout/list_item_survey"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginRight="24dp"
+        android:layout_marginBottom="86dp"
+        android:src="@android:drawable/ic_input_add" />
+
+</FrameLayout>
