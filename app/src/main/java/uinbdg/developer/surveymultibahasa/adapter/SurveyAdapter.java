@@ -1,6 +1,7 @@
 package uinbdg.developer.surveymultibahasa.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 import java.util.List;
 
 import uinbdg.developer.surveymultibahasa.R;
+import uinbdg.developer.surveymultibahasa.activity.EditSurveyActivity;
 import uinbdg.developer.surveymultibahasa.model.ActiveSurvey;
 import uinbdg.developer.surveymultibahasa.model.Survey;
 
@@ -52,7 +54,9 @@ public class SurveyAdapter extends RecyclerView.Adapter<SurveyAdapter.ViewHolder
         holder.cvSurvey.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(context, survey.getNamaSurvey(), Toast.LENGTH_SHORT).show();
+                Intent i = new Intent(context, EditSurveyActivity.class);
+                i.putExtra("namaSurvey", survey.getNamaSurvey().toString());
+                context.startActivity(i);
             }
         });
     }

@@ -17,6 +17,6 @@
         android:layout_gravity="bottom|end"
         android:layout_marginRight="24dp"
         android:layout_marginBottom="86dp"
-        android:src="@android:drawable/ic_input_add" />
+        android:src="@drawable/ic_add_black_24px" />
 
 </FrameLayout>
