@@ -1,5 +1,7 @@
 package uinbdg.developer.surveymultibahasa.activity;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -11,7 +13,13 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import uinbdg.developer.surveymultibahasa.R;
+import uinbdg.developer.surveymultibahasa.api.BaseApiService;
+import uinbdg.developer.surveymultibahasa.api.UtilsApi;
 
 public class AddQuestionActivity extends AppCompatActivity {
 
@@ -21,10 +29,18 @@ public class AddQuestionActivity extends AppCompatActivity {
     private EditText etQuestion, etOptionSatu, etOptionDua, etOptionTiga, etOptionEmpat;
     private TextView btnCancel, btnSave;
 
+    String idSurvey, tipeSurvey = "text";
+
+    ProgressDialog loading;
+
+    BaseApiService apiService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_question);
+
+        idSurvey = getIntent().getStringExtra("idSurvey");
 
         rbText = (RadioButton) findViewById(R.id.rb_text);
         rbMultiple = (RadioButton) findViewById(R.id.rb_multiple);
@@ -43,6 +59,7 @@ public class AddQuestionActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 llAnswerChoice.setVisibility(View.VISIBLE);
+                tipeSurvey = "multiple";
             }
         });
 
@@ -50,6 +67,7 @@ public class AddQuestionActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 llAnswerChoice.setVisibility(View.GONE);
+                tipeSurvey = "text";
             }
         });
 
@@ -64,13 +82,43 @@ public class AddQuestionActivity extends AppCompatActivity {
             }
         });
 
+        apiService = UtilsApi.getAPIService();
+
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                saveQuestion(tipeSurvey, etQuestion.getText().toString(),
+                        etOptionSatu.getText().toString(), etOptionDua.getText().toString(), etOptionTiga.getText().toString(),
+                        etOptionEmpat.getText().toString(), idSurvey);
                 finish();
-                Toast.makeText(AddQuestionActivity.this, ""+etQuestion.getText().toString(), Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(AddQuestionActivity.this, EditSurveyActivity.class).putExtra("idSurvey",idSurvey));
             }
         });
+    }
+
+    private void saveQuestion(String tipeQuestion, String question, String optionSatu, String optionDua, String optionTiga, String optionEmpat, String idSurvey){
+        loading = ProgressDialog.show(AddQuestionActivity.this, null, "Harap Tunggu...", true, false);
+
+        apiService.addQuestion(tipeQuestion, question, optionSatu, optionDua, optionTiga, optionEmpat, idSurvey)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()){
+                            loading.dismiss();
+                            Toast.makeText(getApplicationContext(), "Success to adding Question", Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            loading.dismiss();
+                            Toast.makeText(getApplicationContext(), "Gagal menambahkan data matkul", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        loading.dismiss();
+                        Toast.makeText(getApplicationContext(), "Koneksi internet bermasalah", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {

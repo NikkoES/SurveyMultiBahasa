@@ -1,6 +1,7 @@
 package uinbdg.developer.surveymultibahasa.fragment;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,21 +21,32 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import uinbdg.developer.surveymultibahasa.R;
 import uinbdg.developer.surveymultibahasa.activity.EditSurveyActivity;
 import uinbdg.developer.surveymultibahasa.adapter.SurveyAdapter;
+import uinbdg.developer.surveymultibahasa.api.BaseApiService;
+import uinbdg.developer.surveymultibahasa.api.UtilsApi;
+import uinbdg.developer.surveymultibahasa.model.ResponseSurvey;
 import uinbdg.developer.surveymultibahasa.model.Survey;
 
 public class SurveyFragment extends Fragment {
 
     private RecyclerView rvSurvey;
     private SurveyAdapter adapter;
-    private List<Survey> listSurvey;
+    List<Survey> listSurvey = new ArrayList<>();
 
     private FloatingActionButton fab;
 
     private TextView tvJudulSurvey;
     private EditText etNamaSurvey;
+
+    ProgressDialog loading;
+
+    BaseApiService apiService;
 
     public SurveyFragment() {
         // Required empty public constructor
@@ -48,6 +60,16 @@ public class SurveyFragment extends Fragment {
 
         rvSurvey = (RecyclerView) view.findViewById(R.id.rv_survey);
         fab = (FloatingActionButton) view.findViewById(R.id.fab);
+
+        apiService = UtilsApi.getAPIService();
+
+        adapter = new SurveyAdapter(getContext(), listSurvey);
+
+        rvSurvey.setHasFixedSize(true);
+        rvSurvey.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvSurvey.setAdapter(adapter);
+
+        refresh();
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,9 +92,7 @@ public class SurveyFragment extends Fragment {
                         .setPositiveButton("Create", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Intent i = new Intent(getActivity(), EditSurveyActivity.class);
-                                i.putExtra("namaSurvey", etNamaSurvey.getText().toString());
-                                startActivity(i);
+                                createNewSurvey(etNamaSurvey.getText().toString());
                             }
                         })
                         .setNegativeButton("Cancel", null)
@@ -81,19 +101,59 @@ public class SurveyFragment extends Fragment {
             }
         });
 
-        listSurvey = new ArrayList<>();
-        listSurvey.add(new Survey("Nama Survey Pertama","05/02/2018"));
-        listSurvey.add(new Survey("Nama Survey Kedua", "05/02/2018"));
-        listSurvey.add(new Survey("Nama Survey Ketiga", "05/02/2018"));
-        listSurvey.add(new Survey("Nama Survey Keempat", "05/02/2018"));
-
-        adapter = new SurveyAdapter(getContext(), listSurvey);
-
-        rvSurvey.setHasFixedSize(true);
-        rvSurvey.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvSurvey.setAdapter(adapter);
-
         return view;
+    }
+
+    private void createNewSurvey(String namaSurvey){
+        loading = ProgressDialog.show(getContext(), null, "Harap Tunggu...", true, false);
+
+        apiService.createSurvey(namaSurvey)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()){
+                            loading.dismiss();
+                            Toast.makeText(getContext(), "Success to adding new Survey", Toast.LENGTH_SHORT).show();
+                            refresh();
+                        } else {
+                            loading.dismiss();
+                            Toast.makeText(getContext(), "Gagal menambahkan data matkul", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        loading.dismiss();
+                        Toast.makeText(getContext(), "Koneksi internet bermasalah", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    public void refresh() {
+        loading = ProgressDialog.show(getContext(), null, "Harap Tunggu...", true, false);
+
+        apiService.getListSurvey().enqueue(new Callback<ResponseSurvey>() {
+            @Override
+            public void onResponse(Call<ResponseSurvey> call, Response<ResponseSurvey> response) {
+                if (response.isSuccessful()){
+                    loading.dismiss();
+
+                    listSurvey = response.body().getSurveyList();
+
+                    rvSurvey.setAdapter(new SurveyAdapter(getContext(), listSurvey));
+                    adapter.notifyDataSetChanged();
+                } else {
+                    loading.dismiss();
+                    Toast.makeText(getContext(), "Gagal mengambil data dosen", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseSurvey> call, Throwable t) {
+                loading.dismiss();
+                Toast.makeText(getContext(), "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 }

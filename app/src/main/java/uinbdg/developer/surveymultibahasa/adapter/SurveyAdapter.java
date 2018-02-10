@@ -55,7 +55,7 @@ public class SurveyAdapter extends RecyclerView.Adapter<SurveyAdapter.ViewHolder
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(context, EditSurveyActivity.class);
-                i.putExtra("namaSurvey", survey.getNamaSurvey().toString());
+                i.putExtra("idSurvey", survey.getIdSurvey().toString());
                 context.startActivity(i);
             }
         });

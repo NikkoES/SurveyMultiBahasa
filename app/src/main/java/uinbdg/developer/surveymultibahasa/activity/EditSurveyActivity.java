@@ -1,6 +1,7 @@
 package uinbdg.developer.surveymultibahasa.activity;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
@@ -19,27 +20,41 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import uinbdg.developer.surveymultibahasa.R;
 import uinbdg.developer.surveymultibahasa.adapter.QuestionAdapter;
+import uinbdg.developer.surveymultibahasa.adapter.SurveyAdapter;
+import uinbdg.developer.surveymultibahasa.api.BaseApiService;
+import uinbdg.developer.surveymultibahasa.api.UtilsApi;
 import uinbdg.developer.surveymultibahasa.model.Question;
+import uinbdg.developer.surveymultibahasa.model.ResponseQuestion;
+import uinbdg.developer.surveymultibahasa.model.ResponseSurvey;
 
 public class EditSurveyActivity extends AppCompatActivity {
 
     private RecyclerView rvQuestion;
     private QuestionAdapter adapter;
-    private List<Question> listQuetion;
+    List<Question> listQuetion = new ArrayList<>();
 
     private FloatingActionButton fab;
+
+    ProgressDialog loading;
+
+    BaseApiService apiService;
+
+    String idSurvey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_survey);
 
-        String namaSurvey = getIntent().getStringExtra("namaSurvey");
+        idSurvey = getIntent().getStringExtra("idSurvey");
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Edit Survey "+namaSurvey);
+        getSupportActionBar().setTitle("Edit Survey ");
 
         rvQuestion = (RecyclerView) findViewById(R.id.rv_question);
         fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -47,22 +62,49 @@ public class EditSurveyActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                finish();
                 Intent i = new Intent(getApplicationContext(), AddQuestionActivity.class);
+                i.putExtra("idSurvey", idSurvey);
                 startActivity(i);
             }
         });
 
-        listQuetion = new ArrayList<>();
-        listQuetion.add(new Question("text","Apakah yang dimaksud dengan ini ?","","","",""));
-        listQuetion.add(new Question("multiple","Manakah yang dimaksud dengan ini ?","Ini","Itu","Sana","Situ"));
-        listQuetion.add(new Question("text","Apakah yang dimaksud dengan itu ?","","","",""));
-        listQuetion.add(new Question("multiple","Manakah yang dimaksud dengan itu ?","Ini","Itu","Sana","Situ"));
+        apiService = UtilsApi.getAPIService();
 
         adapter = new QuestionAdapter(getApplicationContext(), listQuetion);
 
         rvQuestion.setHasFixedSize(true);
         rvQuestion.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         rvQuestion.setAdapter(adapter);
+
+        refresh();
+    }
+
+    public void refresh() {
+        loading = ProgressDialog.show(EditSurveyActivity.this, null, "Harap Tunggu...", true, false);
+
+        apiService.getListQuestion(idSurvey).enqueue(new Callback<ResponseQuestion>() {
+            @Override
+            public void onResponse(Call<ResponseQuestion> call, Response<ResponseQuestion> response) {
+                if (response.isSuccessful()){
+                    loading.dismiss();
+
+                    listQuetion = response.body().getQuestionList();
+
+                    rvQuestion.setAdapter(new QuestionAdapter(getApplicationContext(), listQuetion));
+                    adapter.notifyDataSetChanged();
+                } else {
+                    loading.dismiss();
+                    Toast.makeText(getApplicationContext(), "Gagal mengambil data dosen", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseQuestion> call, Throwable t) {
+                loading.dismiss();
+                Toast.makeText(getApplicationContext(), "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
