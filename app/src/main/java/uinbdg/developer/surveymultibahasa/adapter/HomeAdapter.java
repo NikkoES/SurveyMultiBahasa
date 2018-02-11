@@ -1,6 +1,7 @@
 package uinbdg.developer.surveymultibahasa.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,7 +13,9 @@ import android.widget.Toast;
 import java.util.List;
 
 import uinbdg.developer.surveymultibahasa.R;
+import uinbdg.developer.surveymultibahasa.activity.EditSurveyActivity;
 import uinbdg.developer.surveymultibahasa.model.ActiveSurvey;
+import uinbdg.developer.surveymultibahasa.model.Survey;
 
 /**
  * Created by Nikko Eka Saputra on 10/02/2018.
@@ -42,16 +45,17 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
     public void onBindViewHolder(ViewHolder holder, int position) {
         final ActiveSurvey activeSurvey = listActiveSurvey.get(position);
         holder.lblNamaSurvey.setText(activeSurvey.getNamaSurvey());
-        holder.lblTotalResponse.setText(activeSurvey.getTotalResponse());
         holder.lblDateCreated.setText(activeSurvey.getCreatedAt());
         holder.lblActiveSurvey.setText("active survey");
-        holder.lblTitleTotalResponse.setText("Total Response");
         holder.lblCreated.setText("Created At");
 
         holder.cvHome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(context, activeSurvey.getNamaSurvey(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Coming Soon !", Toast.LENGTH_SHORT).show();
+//                Intent i = new Intent(context, EditSurveyActivity.class);
+//                i.putExtra("idSurvey", activeSurvey.getIdSurvey().toString());
+//                context.startActivity(i);
             }
         });
     }
@@ -63,18 +67,16 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         private CardView cvHome;
-        private TextView lblActiveSurvey, lblTitleTotalResponse, lblCreated;
-        private TextView lblNamaSurvey, lblTotalResponse, lblDateCreated;
+        private TextView lblActiveSurvey, lblCreated;
+        private TextView lblNamaSurvey, lblDateCreated;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             cvHome = (CardView) itemView.findViewById(R.id.cv_home);
             lblNamaSurvey = (TextView) itemView.findViewById(R.id.tv_nama_survey);
-            lblTotalResponse = (TextView) itemView.findViewById(R.id.tv_jumlah_response);
             lblDateCreated = (TextView) itemView.findViewById(R.id.tv_date);
             lblActiveSurvey = (TextView) itemView.findViewById(R.id.tv_active_survey);
-            lblTitleTotalResponse = (TextView) itemView.findViewById(R.id.tv_total_response);
             lblCreated = (TextView) itemView.findViewById(R.id.tv_created_at);
         }
     }

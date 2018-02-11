@@ -1,6 +1,7 @@
 package uinbdg.developer.surveymultibahasa.fragment;
 
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,13 +9,23 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import uinbdg.developer.surveymultibahasa.R;
 import uinbdg.developer.surveymultibahasa.adapter.HomeAdapter;
+import uinbdg.developer.surveymultibahasa.adapter.SurveyAdapter;
+import uinbdg.developer.surveymultibahasa.api.BaseApiService;
+import uinbdg.developer.surveymultibahasa.api.UtilsApi;
 import uinbdg.developer.surveymultibahasa.model.ActiveSurvey;
+import uinbdg.developer.surveymultibahasa.model.ResponseActiveSurvey;
+import uinbdg.developer.surveymultibahasa.model.ResponseSurvey;
+import uinbdg.developer.surveymultibahasa.model.Survey;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -23,7 +34,11 @@ public class HomeFragment extends Fragment {
 
     private RecyclerView rvHome;
     private HomeAdapter adapter;
-    private List<ActiveSurvey> listActiveSurvey;
+    List<ActiveSurvey> listActiveSurvey = new ArrayList<>();
+
+    ProgressDialog loading;
+
+    BaseApiService apiService;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -37,19 +52,44 @@ public class HomeFragment extends Fragment {
 
         rvHome = (RecyclerView) view.findViewById(R.id.rv_home);
 
-        listActiveSurvey = new ArrayList<>();
-        listActiveSurvey.add(new ActiveSurvey("Nama Survey Pertama","8", "05/02/2018"));
-        listActiveSurvey.add(new ActiveSurvey("Nama Survey Kedua","0", "05/02/2018"));
-        listActiveSurvey.add(new ActiveSurvey("Nama Survey Ketiga","3", "05/02/2018"));
-        listActiveSurvey.add(new ActiveSurvey("Nama Survey Keempat","12", "05/02/2018"));
-
         adapter = new HomeAdapter(getContext(), listActiveSurvey);
+
+        apiService = UtilsApi.getAPIService();
 
         rvHome.setHasFixedSize(true);
         rvHome.setLayoutManager(new LinearLayoutManager(getContext()));
         rvHome.setAdapter(adapter);
 
+        refresh();
+
         return view;
+    }
+
+    public void refresh() {
+        loading = ProgressDialog.show(getContext(), null, "Harap Tunggu...", true, false);
+
+        apiService.getListActiveSurvey().enqueue(new Callback<ResponseActiveSurvey>() {
+            @Override
+            public void onResponse(Call<ResponseActiveSurvey> call, Response<ResponseActiveSurvey> response) {
+                if (response.isSuccessful()){
+                    loading.dismiss();
+
+                    listActiveSurvey = response.body().getSurveyList();
+
+                    rvHome.setAdapter(new HomeAdapter(getContext(), listActiveSurvey));
+                    adapter.notifyDataSetChanged();
+                } else {
+                    loading.dismiss();
+                    Toast.makeText(getContext(), "Gagal mengambil data dosen", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseActiveSurvey> call, Throwable t) {
+                loading.dismiss();
+                Toast.makeText(getContext(), "Koneksi Internet Bermasalah", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 }

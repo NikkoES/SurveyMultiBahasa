@@ -1,29 +1,50 @@
 package uinbdg.developer.surveymultibahasa.model;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by Nikko Eka Saputra on 10/02/2018.
  */
 
 public class ActiveSurvey {
-    private String namaSurvey;
-    private String totalResponse;
-    private String createdAt;
+    @SerializedName("id_survey")
+    String idSurvey;
+    @SerializedName("nama_survey")
+    String namaSurvey;
+    @SerializedName("created_at")
+    String createdAt;
+    @SerializedName("modified_at")
+    String modifiedAt;
 
-    public ActiveSurvey(String namaSurvey, String totalResponse, String createdAt) {
-        this.namaSurvey = namaSurvey;
-        this.totalResponse = totalResponse;
-        this.createdAt = createdAt;
+    public String getIdSurvey() {
+        return idSurvey;
+    }
+
+    public void setIdSurvey(String idSurvey) {
+        this.idSurvey = idSurvey;
     }
 
     public String getNamaSurvey() {
         return namaSurvey;
     }
 
-    public String getTotalResponse() {
-        return totalResponse;
+    public void setNamaSurvey(String namaSurvey) {
+        this.namaSurvey = namaSurvey;
     }
 
     public String getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(String modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 }

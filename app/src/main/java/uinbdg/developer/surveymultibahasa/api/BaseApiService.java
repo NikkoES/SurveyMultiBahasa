@@ -8,6 +8,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import uinbdg.developer.surveymultibahasa.model.ResponseActiveSurvey;
 import uinbdg.developer.surveymultibahasa.model.ResponseQuestion;
 import uinbdg.developer.surveymultibahasa.model.ResponseSurvey;
 
@@ -19,6 +20,9 @@ public interface BaseApiService {
 
     @GET("survey/")
     Call<ResponseSurvey> getListSurvey();
+
+    @GET("survey/")
+    Call<ResponseActiveSurvey> getListActiveSurvey();
 
     @GET("question/{idsurvey}")
     Call<ResponseQuestion> getListQuestion(@Path("idsurvey") String idSurvey);
